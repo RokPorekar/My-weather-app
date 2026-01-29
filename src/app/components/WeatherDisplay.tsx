@@ -27,8 +27,12 @@ export function WeatherDisplay() {
           setError("Napaka pri pridobivanju podatkov.")
         }
       },
-      () => {
-        setError("Dostop do lokacije je bil zavrnjen.")
+      async () => {
+        const data = await getWeather(
+            52,
+            13
+          )
+          setWeather(data)
       }
     )
   }, [])
@@ -37,19 +41,26 @@ export function WeatherDisplay() {
   if (!weather) return <div className="p-4 animate-pulse">Pridobivam GPS lokacijo...</div>
 
   return (
-    <div>
-    <CurrentWeatherCard 
-      temperature={weather.current.temperature}
-      windSpeed={weather.current.windSpeed}
-      windDirection={weather.current.windDirection}
-      time={weather.current.time}
-      locationName="Vaša lokacija (GPS)"
-    />
-    <h3 className="mt-8 self-start max-w-md mx-auto w-full text-sm font-semibold uppercase tracking-wider text-zinc-500">
-        Naslednjih 24 ur
-      </h3>
+    <div className="flex flex-col items-center w-full max-w-md space-y-8">
+      <CurrentWeatherCard 
+        temperature={weather.current.temperature}
+        windSpeed={weather.current.windSpeed}
+        windDirection={weather.current.windDirection}
+        time={weather.current.time}
+        locationName="Ljubljana, Slovenija"
+      />
       
-      <HourlyForecast data={weather.hourly} />
+      <div className="w-full px-2">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">
+            Urna napoved
+          </h3>
+          <span className="text-[10px] font-medium text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
+            24 ur
+          </span>
+        </div>
+        <HourlyForecast data={weather.hourly} />
+      </div>
     </div>
   )
 }
