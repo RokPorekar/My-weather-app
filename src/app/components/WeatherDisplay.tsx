@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getWeather } from '@/app/lib/weather'
 import { CurrentWeatherCard } from './CurrentWeatherCard'
+import { HourlyForecast } from './HourlyForecast'
 
 export function WeatherDisplay() {
   const [weather, setWeather] = useState<any>(null)
@@ -36,6 +37,7 @@ export function WeatherDisplay() {
   if (!weather) return <div className="p-4 animate-pulse">Pridobivam GPS lokacijo...</div>
 
   return (
+    <div>
     <CurrentWeatherCard 
       temperature={weather.current.temperature}
       windSpeed={weather.current.windSpeed}
@@ -43,5 +45,11 @@ export function WeatherDisplay() {
       time={weather.current.time}
       locationName="Vaša lokacija (GPS)"
     />
+    <h3 className="mt-8 self-start max-w-md mx-auto w-full text-sm font-semibold uppercase tracking-wider text-zinc-500">
+        Naslednjih 24 ur
+      </h3>
+      
+      <HourlyForecast data={weather.hourly} />
+    </div>
   )
 }
