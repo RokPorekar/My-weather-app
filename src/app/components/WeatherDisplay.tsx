@@ -48,6 +48,7 @@ export function WeatherDisplay() {
         windDirection={weather.current.windDirection}
         time={weather.current.time}
         locationName="Ljubljana, Slovenija"
+        weatherCode={weather.current.weatherCode}
       />
       
       <div className="w-full px-2">

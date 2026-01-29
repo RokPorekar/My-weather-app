@@ -4,12 +4,13 @@ type Props = {
   windDirection: number
   time: Date
   locationName?: string
+  weatherCode: { label: string; icon: string }
 }
 
 export function CurrentWeatherCard({
   temperature,
   windSpeed,
-  windDirection,
+  weatherCode,
   time,
   locationName = 'Trenutno vreme',
 }: Props) {
@@ -35,7 +36,7 @@ export function CurrentWeatherCard({
           <span className="text-8xl font-bold tracking-tighter">
             {Math.round(temperature)}°
           </span>
-          <span className="text-lg font-medium ml-1 opacity-90">Pretežno jasno</span>
+          <span className="text-lg font-medium ml-1 opacity-90">{weatherCode.label} {weatherCode.icon}</span>
         </div>
         
         <div className="flex flex-col gap-3">
