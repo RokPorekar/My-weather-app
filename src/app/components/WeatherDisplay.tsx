@@ -1,82 +1,143 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { getWeather } from '@/app/lib/weather'
 import { CurrentWeatherCard } from './CurrentWeatherCard'
 import { HourlyForecast } from './HourlyForecast'
 import { DailyForecast } from './DailyForecast'
 
+const CITIES = [
+  { name: "📍 Moja lokacija", lat: null, lon: null },
+  { name: "Ljubljana", lat: 46.0569, lon: 14.5058 },
+  { name: "Maribor", lat: 46.5547, lon: 15.6459 },
+  { name: "Koper", lat: 45.5469, lon: 13.7294 },
+  { name: "Celje", lat: 46.2293889, lan: 15.2616828},
+  { name: "Zagreb", lat: 45.8130967, lan: 15.9772795},
+  { name: "Pula", lat: 44.8702281, lan: 13.8455311},
+  { name: "Zadar", lat: 44.1168594, lan: 15.2353257},
+  { name: "Dunaj", lat: 48.2082, lon: 16.3738 },
+  { name: "Pariz", lat: 48.8566, lon: 2.3522 },
+  { name: "Berlin", lat: 52.5200, lon: 13.4050 },
+  { name: "Rim", lat: 41.9028, lon: 12.4964 },
+  { name: "Madrid", lat: 40.4168, lon: -3.7038 },
+  { name: "London", lat: 51.5074456, lan: -0.1277653},
+  { name: "Budimpešta", lat: 47.4813896, lan: 19.1460941},
+  { name: "Atene", lat: 37.9755648, lan: 23.7348324},
+  { name: "Dublin", lat: 53.3493795, lan: -6.2605593},
+  { name: "Tokio", lat: 35.6768601, lan: 139.7638947},
+  { name: "Šangaj", lat: 31.2312707, lan: 121.4700152},
+  { name: "Hong Kong", lat: 22.2792968, lan: 114.1628907},
+  { name: "Sidni", lat: -33.8698439, lan: 151.2082848},
+  { name: "New York", lat: 40.7127281, lan: -74.0060152},
+  { name: "Dallas", lat: 32.7762719, lan: -96.7968559},
+  { name: "Los angeles", lat: 34.0536909, lan: -118.242766},
+  { name: "San Francisco", lat: 37.7879363, lan: -122.4075201},
+];
+
 export function WeatherDisplay() {
   const [weather, setWeather] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeCity, setActiveCity] = useState(CITIES[0].name)
+
+  const fetchWeather = useCallback(async (lat: number, lon: number) => {
+    setLoading(true)
+    try {
+      const data = await getWeather(lat, lon)
+      setWeather(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const loadGPS = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+      () => fetchWeather(46.0569, 14.5058)
+    )
+  }, [fetchWeather])
 
   useEffect(() => {
-    // Definiramo funkcijo znotraj Effecta
-    const fetchLocationAndWeather = async () => {
-      // 1. Preverimo podporo za geolokacijo
-      if (!navigator.geolocation) {
-        setError("Vaš brskalnik ne podpira GPS lokacije.")
-        return
-      }
-
-      // 2. Pridobimo pozicijo
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const data = await getWeather(
-              position.coords.latitude,
-              position.coords.longitude
-            )
-            setWeather(data)
-          } catch (err) {
-            setError("Napaka pri pridobivanju podatkov.")
-          }
-        },
-        async () => {
-          // Če uporabnik zavrne GPS, uporabimo privzeto lokacijo (npr. Berlin)
-          // To se zgodi asinhrono v callbacku, kar je OK
-          try {
-            const data = await getWeather(52.52, 13.41)
-            setWeather(data)
-          } catch (err) {
-            setError("Ni mogoče pridobiti niti privzetih podatkov.")
-          }
-        }
-      )
-    }
-
-    fetchLocationAndWeather()
-  }, []) // Prazen array poskrbi, da se izvede samo ob mountu
-
-  if (error) return (
-    <div className="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-3xl text-sm font-medium">
-      ⚠️ {error}
-    </div>
-  )
-
-  if (!weather) return (
-    <div className="flex flex-col items-center justify-center p-12 space-y-4">
-      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-zinc-400 animate-pulse text-sm">Pridobivam vreme...</p>
-    </div>
-  )
+    loadGPS()
+  }, [loadGPS])
 
   return (
-    <div className="flex flex-col items-center w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <CurrentWeatherCard 
-        temperature={weather.current.temperature}
-        weatherCode={weather.current.weatherCode}
-        windSpeed={weather.current.windSpeed}
-        windDirection={weather.current.windDirection}
-        time={weather.current.time}
-        locationName={weather.locationName}
-      />
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100">
       
-      <div className="w-full">
-        <HourlyForecast data={weather.hourly} />
-      </div>
+      {/* --- SIDEBAR --- */}
+      <aside className="w-72 border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950">
+        <div className="p-6">
+          <h1 className="text-xl font-bold tracking-tight">Vremenko</h1>
+          <p className="text-xs text-zinc-500 mt-1">Izberi lokacijo</p>
+        </div>
+        
+        <nav className="flex-1 overflow-y-auto px-4 space-y-1 custom-scrollbar">
+          {CITIES.map((city) => (
+            <button
+              key={city.name}
+              onClick={() => {
+                setActiveCity(city.name);
+                city.lat ? fetchWeather(city.lat, city.lon!) : loadGPS();
+              }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium transition-all
+                ${activeCity === city.name 
+                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' 
+                  : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                }`}
+            >
+              {city.name}
+              {activeCity === city.name && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />}
+            </button>
+          ))}
+        </nav>
 
-      <DailyForecast data={weather.daily} />
+        <div className="p-6 border-t border-zinc-100 dark:border-zinc-900">
+           <div className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Open-Meteo API</div>
+        </div>
+      </aside>
+
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 overflow-y-auto custom-scrollbar bg-zinc-50 dark:bg-zinc-950/50">
+        {loading ? (
+          <div className="h-full flex items-center justify-center">
+             <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-zinc-400 font-medium">Osvežujem podatke...</span>
+             </div>
+          </div>
+        ) : weather && (
+          <div className="max-w-5xl mx-auto p-8 lg:p-12 animate-in fade-in duration-700">
+            
+            {/* Zgornji del: Trenutno vreme in Tedenska napoved bok ob boku */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              
+              <div className="lg:col-span-2 space-y-8">
+                <CurrentWeatherCard 
+                  temperature={weather.current.temperature}
+                  weatherCode={weather.current.weatherCode}
+                  windSpeed={weather.current.windSpeed}
+                  windDirection={weather.current.windDirection}
+                  time={weather.current.time}
+                  locationName={weather.locationName}
+                />
+                
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-4 ml-4 text-center sm:text-left">
+                    Urna napoved (24h)
+                  </h3>
+                  <HourlyForecast data={weather.hourly} />
+                </div>
+              </div>
+
+              <div className="lg:col-span-1">
+                <DailyForecast data={weather.daily} />
+              </div>
+
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
