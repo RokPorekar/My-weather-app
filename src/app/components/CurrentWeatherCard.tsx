@@ -12,7 +12,7 @@ export function CurrentWeatherCard({
   windSpeed,
   weatherCode,
   time,
-  locationName = 'Trenutno vreme',
+  locationName,
 }: Props) {
   return (
     <section className="w-full max-w-md overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-500 to-indigo-600 p-8 text-white shadow-2xl shadow-blue-200 dark:shadow-none relative">

@@ -20,6 +20,19 @@ export function getWeatherDetails(code: number) {
 }
 
 export async function getWeather(lat: number, lon: number) {
+
+  // 1. Pridobivanje imena kraja (Reverse Geocoding)
+  let locationName = "Neznana lokacija";
+  try {
+    const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+    const geoRes = await fetch(geoUrl, { headers: { 'User-Agent': 'WeatherApp/1.0' } });
+    const geoData = await geoRes.json();
+    // Poskusimo dobiti mesto, naselje ali vas
+    locationName = geoData.address.city || geoData.address.town || geoData.address.village || geoData.address.suburb || "Vaša lokacija";
+  } catch (e) {
+    console.error("Napaka pri geokodiranju", e);
+  }
+
   const params = {
     latitude: lat,
     longitude: lon,
@@ -57,6 +70,7 @@ export async function getWeather(lat: number, lon: number) {
     .slice(0, 24);
 
   return {
+    locationName,
     current: {
       temperature: current.variables(0)!.value(),
       windSpeed: current.variables(1)!.value().toPrecision(3),

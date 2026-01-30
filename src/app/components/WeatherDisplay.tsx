@@ -47,7 +47,7 @@ export function WeatherDisplay() {
         windSpeed={weather.current.windSpeed}
         windDirection={weather.current.windDirection}
         time={weather.current.time}
-        locationName="Ljubljana, Slovenija"
+        locationName={weather.locationName}
         weatherCode={weather.current.weatherCode}
       />
       
