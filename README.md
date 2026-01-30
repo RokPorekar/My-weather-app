@@ -37,3 +37,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 
 I will use the data acuired from https://open-meteo.com/en/docs?timezone=auto
+
+This is the api that can be modified to check the structured data https://api.open-meteo.com/v1/forecast?latitude=46.4991&longitude=15.6514&current=temperature_2m&daily=temperature_2m_max,weather_code
