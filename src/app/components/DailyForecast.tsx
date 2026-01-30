@@ -1,37 +1,28 @@
 export function DailyForecast({ data }: { data: any[] }) {
   return (
-    <div className="w-full max-w-md mt-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] p-6 border border-zinc-100 dark:border-zinc-800 shadow-sm">
-      <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-6 px-2">
-        Napoved za 7 dni
-      </h3>
-      <div className="space-y-6">
-        {data.map((day, i) => (
-          <div key={i} className="flex items-center justify-between px-2">
-            {/* Dan v tednu */}
-            <span className="w-12 text-sm font-medium text-zinc-600 dark:text-zinc-300 capitalize">
-              {i === 0 ? 'Danes' : new Date(day.time).toLocaleDateString('sl-SI', { weekday: 'short' })}
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      {data.map((day, i) => (
+        <div key={i} className="flex flex-col items-center p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/50 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors group">
+          <span className="text-xs font-bold text-zinc-400 uppercase tracking-tighter mb-4 group-hover:text-blue-500">
+            {i === 0 ? 'Danes' : new Date(day.time).toLocaleDateString('sl-SI', { weekday: 'short' })}
+          </span>
+          
+          <span className="text-4xl mb-2">{day.weatherCode.icon}</span>
+          
+          <div className="flex flex-col items-center">
+            <span className="text-xl font-black dark:text-white">
+              {Math.round(day.tempMax)}°
             </span>
-            
-            {/* Ikona in labela */}
-            <div className="flex items-center gap-3 flex-1 justify-center">
-              <span className="text-2xl">{day.weatherCode.icon}</span>
-              <span className="text-xs text-zinc-400 hidden sm:inline-block w-24 text-left">
-                {day.weatherCode.label}
-              </span>
-            </div>
-
-            {/* Temperature min/max */}
-            <div className="flex gap-3 w-20 justify-end">
-              <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
-                {Math.round(day.tempMax)}°
-              </span>
-              <span className="text-sm font-medium text-zinc-400">
-                {Math.round(day.tempMin)}°
-              </span>
-            </div>
+            <span className="text-xs font-medium text-zinc-400">
+              {Math.round(day.tempMin)}°
+            </span>
           </div>
-        ))}
-      </div>
+          
+          <span className="text-[10px] text-zinc-400 mt-4 text-center leading-tight opacity-0 group-hover:opacity-100 transition-opacity">
+            {day.weatherCode.label}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }

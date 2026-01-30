@@ -7,7 +7,7 @@ type HourlyData = {
 
 export function HourlyForecast({ data }: { data: HourlyData[] }) {
   return (
-    <div className="w-full max-w-md mt-4 overflow-hidden">
+    <div className="w-full mt-4 overflow-hidden">
       <div className="flex gap-3 overflow-x-auto pb-6 pt-2 scrollbar-hide -mx-4 px-4">
         {data.map((hour, i) => {
           const isFirst = i === 0;
