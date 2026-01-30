@@ -108,3 +108,18 @@ export async function getWeather(lat: number, lon: number) {
     daily: dailyData,
   }
 }
+
+export async function searchCities(query: string) {
+  if (query.length < 2) return [];
+  
+  try {
+    const res = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=sl&format=json`
+    );
+    const data = await res.json();
+    return data.results || [];
+  } catch (e) {
+    console.error("Napaka pri iskanju mest", e);
+    return [];
+  }
+}

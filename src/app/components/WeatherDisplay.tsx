@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { getWeather } from '@/app/lib/weather'
+import { getWeather, searchCities } from '@/app/lib/weather'
 import { CurrentWeatherCard } from './CurrentWeatherCard'
 import { HourlyForecast } from './HourlyForecast'
 import { DailyForecast } from './DailyForecast'
@@ -62,6 +62,27 @@ export function WeatherDisplay() {
     loadGPS()
   }, [loadGPS])
 
+  // Iskalna stanja
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Funkcija za iskanje mest
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.length > 1) {
+        setIsSearching(true)
+        const results = await searchCities(searchQuery)
+        setSearchResults(results)
+        setIsSearching(false)
+      } else {
+        setSearchResults([])
+      }
+    }, 400) // Počakamo 400ms po zadnjem tipkanju (debouncing)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [searchQuery])
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100">
       
@@ -70,6 +91,40 @@ export function WeatherDisplay() {
         <div className="p-6">
           <h1 className="text-xl font-bold tracking-tight">Vremenko</h1>
           <p className="text-xs text-zinc-500 mt-1">Izberi lokacijo</p>
+        </div>
+
+        {/* --- SEARCH BAR --- */}
+        <div className="px-4 py-4 relative">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Išči mesto..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            />
+            {isSearching && (
+              <div className="absolute right-3 top-3.5 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            )}
+          </div>
+
+          {/* Rezultati iskanja (Floating menu) */}
+          {searchResults.length > 0 && (
+            <div className="absolute left-4 right-4 mt-2 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              {searchResults.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => fetchWeather(city.latitude, city.longitude)}
+                  className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-b border-zinc-50 dark:border-zinc-800 last:border-none transition-colors"
+                >
+                  <div className="font-bold text-sm">{city.name}</div>
+                  <div className="text-[10px] text-zinc-400 uppercase tracking-wider">
+                    {city.admin1 ? `${city.admin1}, ` : ''}{city.country}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         <nav className="flex-1 overflow-y-auto px-4 space-y-1 custom-scrollbar">
